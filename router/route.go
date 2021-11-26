@@ -1,14 +1,13 @@
 package router
 
 import (
-	"my_scaffold/controller"
-	"my_scaffold/middleware"
 	"github.com/e421083458/golang_common/lib"
-	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
-	"my_scaffold/docs"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
+	"my_scaffold/controller"
+	"my_scaffold/docs"
+	"my_scaffold/middleware"
 )
 
 // @title Swagger Example API
@@ -82,9 +81,10 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	}
 
 	//非登陆接口
-	store := sessions.NewCookieStore([]byte("secret"))
+	//store := sessions.NewCookieStore([]byte("secret"))
 	apiNormalGroup := router.Group("/api")
-	apiNormalGroup.Use(sessions.Sessions("mysession", store),
+	apiNormalGroup.Use(
+		//sessions.Sessions("mysession", store),
 		middleware.RecoveryMiddleware(),
 		middleware.RequestLog(),
 		middleware.TranslationMiddleware())
@@ -95,10 +95,11 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 	//登陆接口
 	apiAuthGroup := router.Group("/api")
 	apiAuthGroup.Use(
-		sessions.Sessions("mysession", store),
+		//sessions.Sessions("mysession", store),
 		middleware.RecoveryMiddleware(),
 		middleware.RequestLog(),
-		middleware.SessionAuthMiddleware(),
+		//middleware.SessionAuthMiddleware(),
+		middleware.JwtAuthMiddleware(),
 		middleware.TranslationMiddleware())
 	{
 		controller.ApiLoginRegister(apiAuthGroup)
