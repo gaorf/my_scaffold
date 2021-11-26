@@ -2,13 +2,16 @@ package controller
 
 import (
 	"errors"
-	"my_scaffold/dao"
-	"my_scaffold/dto"
-	"my_scaffold/middleware"
+	"fmt"
 	"github.com/e421083458/golang_common/lib"
 	"github.com/gin-gonic/contrib/sessions"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
+	"my_scaffold/dao"
+	"my_scaffold/dto"
+	"my_scaffold/middleware"
 	"strings"
+	"time"
 )
 
 type ApiController struct {
@@ -35,14 +38,34 @@ func (demo *ApiController) Login(c *gin.Context) {
 		middleware.ResponseError(c, 2001, err)
 		return
 	}
-	if api.Username == "admin" && api.Password == "123456" {
-		session := sessions.Default(c)
-		session.Set("user", api.Username)
-		session.Save()
-		middleware.ResponseSuccess(c, "")
+
+	tx, err := lib.GetGormPool("default")
+	if err != nil {
+		middleware.ResponseError(c, 2002, err)
 		return
 	}
-	middleware.ResponseError(c, 2002, errors.New("账号或密码错误"))
+
+	maps := fmt.Sprintf(" name = '%v' and password='%v' ", api.Username, api.Password)
+	users ,err := (&dao.User{}).FindUserByName(c, tx, maps)
+
+	if err != nil {
+		middleware.ResponseError(c, 2002, errors.New("账号或密码错误"))
+		return
+	}
+
+	token,err := GenerateToken(users)
+	if err != nil {
+		middleware.ResponseError(c, 2002, errors.New(err.Error()))
+		return
+	}
+
+	type UserLogin struct {
+		Token string
+	}
+	data := UserLogin{
+		Token: token,
+	}
+	middleware.ResponseSuccess(c, data)
 	return
 }
 
@@ -157,4 +180,27 @@ func (demo *ApiController) RemoveUser(c *gin.Context) {
 	}
 	middleware.ResponseSuccess(c, "")
 	return
+}
+
+
+func GenerateToken(user dao.User) (string, error){
+	j := &middleware.JWT{
+		[]byte("newtrekWang"),
+	}
+
+	claims := middleware.CustomClaims{
+		user.Id,
+		user.Name,
+		jwt.StandardClaims{
+			NotBefore: int64(time.Now().Unix() - 1000), // 签名生效时间
+			ExpiresAt: int64(time.Now().Unix() + 3600), // 签名过期时间
+			Issuer:    "newtrekWang",                    // 签名颁发者
+		},
+	}
+
+	token, err := j.CreateToken(claims)
+	if err != nil {
+		return "", err
+	}
+	return token, nil
 }

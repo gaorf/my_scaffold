@@ -45,6 +45,13 @@ func (f *User) Find(c *gin.Context, tx *gorm.DB, id int64) (*User, error) {
 	return user, nil
 }
 
+func (f *User) FindUserByName(c *gin.Context, tx *gorm.DB, maps interface{}) (User, error){
+	var user User
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where(maps).First(&user).Error
+	return user, err
+}
+
+
 func (f *User) PageList(c *gin.Context, tx *gorm.DB, params *dto.ListPageInput) ([]User, int64, error) {
 	var list []User
 	var count int64
