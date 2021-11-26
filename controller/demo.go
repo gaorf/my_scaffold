@@ -1,10 +1,10 @@
 package controller
 
 import (
-	"github.com/e421083458/gin_scaffold/dao"
-	"github.com/e421083458/gin_scaffold/dto"
-	"github.com/e421083458/gin_scaffold/middleware"
-	"github.com/e421083458/gin_scaffold/public"
+	"my_scaffold/dao"
+	"my_scaffold/dto"
+	"my_scaffold/middleware"
+	"my_scaffold/public"
 	"github.com/e421083458/golang_common/lib"
 	"github.com/garyburd/redigo/redis"
 	"github.com/gin-gonic/gin"
