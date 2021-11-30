@@ -103,6 +103,7 @@ func InitRouter(middlewares ...gin.HandlerFunc) *gin.Engine {
 		middleware.TranslationMiddleware())
 	{
 		controller.ApiLoginRegister(apiAuthGroup)
+		controller.ApiUserRegister(apiAuthGroup)
 	}
 	return router
 }

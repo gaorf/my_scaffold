@@ -36,13 +36,10 @@ func (f *User) Del(c *gin.Context, tx *gorm.DB, idSlice []string) error {
 	return nil
 }
 
-func (f *User) Find(c *gin.Context, tx *gorm.DB, id int64) (*User, error) {
-	var user *User
-	err := tx.SetCtx(public.GetGinTraceContext(c)).Where("id = ?", id).First(user).Error
-	if err != nil {
-		return nil, err
-	}
-	return user, nil
+func (f *User) Find(c *gin.Context, tx *gorm.DB, id int64) (User, error) {
+	var user User
+	err := tx.SetCtx(public.GetGinTraceContext(c)).Where("id = ?", id).First(&user).Error
+	return user, err
 }
 
 func (f *User) FindUserByName(c *gin.Context, tx *gorm.DB, maps interface{}) (User, error){
